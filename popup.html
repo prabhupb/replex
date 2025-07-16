@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Replex Settings</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <div class="popup-header">
+      <div class="header-content">
+        <div class="logo-container">
+          <div class="logo-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <path d="M9 9l6 6"/>
+              <path d="M15 9l-6 6"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="popup-title">Replex</h1>
+            <p class="popup-description">AI-powered tweet replies</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="popup-content">
+      <div class="space-y-6">
+        <div class="form-group">
+          <label class="form-label" for="apiKey">
+            OpenAI API Key
+            <span class="text-muted">*</span>
+          </label>
+          <div class="input-group">
+            <input 
+              type="password" 
+              id="apiKey" 
+              class="form-input" 
+              placeholder="sk-..."
+              autocomplete="off"
+            >
+            <button id="saveKey" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17,21 17,13 7,13 7,21"/>
+                <polyline points="7,3 7,8 15,8"/>
+              </svg>
+              Save
+            </button>
+          </div>
+          <p class="form-help">Get your API key from OpenAI Platform</p>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="defaultTone">Default Tone</label>
+          <select id="defaultTone" class="form-select">
+            <option value="friendly" selected>😊 Friendly</option>
+            <option value="professional">💼 Professional</option>
+            <option value="witty">🎭 Witty</option>
+            <option value="sarcastic">😏 Sarcastic</option>
+            <option value="supportive">🤝 Supportive</option>
+            <option value="casual">😎 Casual</option>
+          </select>
+          <p class="form-help">Choose your default reply tone</p>
+        </div>
+        
+        <div class="alert" id="status" style="display: none;">
+          <div class="alert-content">
+            <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20,6 9,17 4,12"/>
+            </svg>
+            <span class="alert-message"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

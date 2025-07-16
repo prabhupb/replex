@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Replex Icons</title>
+</head>
+<body>
+    <canvas id="canvas16" width="16" height="16"></canvas>
+    <canvas id="canvas48" width="48" height="48"></canvas>
+    <canvas id="canvas128" width="128" height="128"></canvas>
+    
+    <script>
+        function createIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#1da1f2');
+            gradient.addColorStop(1, '#1991db');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Border radius effect
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, size * 0.2);
+            ctx.fill();
+            
+            // Reset composite operation
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // Icon - simplified chat bubble with AI spark
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = size * 0.05;
+            
+            // Chat bubble
+            const bubbleSize = size * 0.6;
+            const bubbleX = size * 0.2;
+            const bubbleY = size * 0.15;
+            
+            ctx.beginPath();
+            ctx.roundRect(bubbleX, bubbleY, bubbleSize, bubbleSize * 0.7, size * 0.1);
+            ctx.fill();
+            
+            // Chat bubble tail
+            ctx.beginPath();
+            ctx.moveTo(bubbleX + bubbleSize * 0.2, bubbleY + bubbleSize * 0.7);
+            ctx.lineTo(bubbleX + bubbleSize * 0.15, bubbleY + bubbleSize * 0.9);
+            ctx.lineTo(bubbleX + bubbleSize * 0.35, bubbleY + bubbleSize * 0.7);
+            ctx.fill();
+            
+            // AI spark/star symbol
+            const sparkSize = size * 0.15;
+            const sparkX = bubbleX + bubbleSize * 0.7;
+            const sparkY = bubbleY + bubbleSize * 0.1;
+            
+            ctx.beginPath();
+            // Simple star shape
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
+                const x = sparkX + Math.cos(angle) * sparkSize;
+                const y = sparkY + Math.sin(angle) * sparkSize;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        // Create icons
+        createIcon(document.getElementById('canvas16'), 16);
+        createIcon(document.getElementById('canvas48'), 48);
+        createIcon(document.getElementById('canvas128'), 128);
+        
+        // Download function
+        function downloadIcon(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Auto-download icons
+        setTimeout(() => {
+            downloadIcon(document.getElementById('canvas16'), 'icon16.png');
+            downloadIcon(document.getElementById('canvas48'), 'icon48.png');
+            downloadIcon(document.getElementById('canvas128'), 'icon128.png');
+        }, 100);
+    </script>
+</body>
+</html>

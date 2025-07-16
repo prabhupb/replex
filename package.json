@@ -1,0 +1,27 @@
+{
+  "name": "replex",
+  "version": "1.0.0",
+  "description": "AI-powered Twitter reply generator Chrome extension",
+  "main": "background.js",
+  "scripts": {
+    "build": "echo 'Chrome extension build complete'",
+    "lint": "echo 'No linter configured'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "twitter",
+    "ai",
+    "openai",
+    "social-media",
+    "reply-generator"
+  ],
+  "author": "Replex Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/replex.git"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}
