@@ -282,13 +282,9 @@ Username: ${context.userName}
 Tweet: "${context.text}"
 
 Requirements:
-You're a solo founder building in public. Write a reply to the tweet below that sounds like a real human — thoughtful, casual, sometimes witty or sharp, but always grounded.
+Write a reply to the tweet below that sounds like a real human — thoughtful, casual, sometimes witty or sharp, but always grounded.
 
 The reply should:
-
-Be in first person
-
-Reflect your actual thoughts or experience
 
 Show personality — ${tone}
 
@@ -301,8 +297,11 @@ Optional: one emoji if it fits naturally
 Don’t include hashtags or links unless they’re organic
 
 Reference or riff on something timely if it makes sense (tech trend, launch, meme, etc).
+
 Keep it brief — think tweet-length or just under.
+
 Be contextually relevant
+
 Sound natural and engaging
 
 Reply:`;
@@ -345,17 +344,37 @@ Reply:`;
 
     if (!generatedText) return;
 
+    // Updated selectors based on the provided HTML structure
     const twitterReplyBox = document.querySelector('[data-testid="tweetTextarea_0"]') || 
-                           document.querySelector('[role="textbox"][aria-label*="reply"]') ||
-                           document.querySelector('div[contenteditable="true"][data-testid="tweetTextarea_0"]');
+                           document.querySelector('.public-DraftEditor-content[contenteditable="true"]') ||
+                           document.querySelector('div[contenteditable="true"][role="textbox"]') ||
+                           document.querySelector('[role="textbox"][aria-label*="Post text"]');
 
     if (twitterReplyBox) {
       twitterReplyBox.focus();
       
-      if (twitterReplyBox.tagName === 'TEXTAREA') {
+      // Handle Draft.js editor content
+      if (twitterReplyBox.classList.contains('public-DraftEditor-content')) {
+        // Clear existing content first
+        const range = document.createRange();
+        const selection = window.getSelection();
+        range.selectNodeContents(twitterReplyBox);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        
+        // Insert the generated text
+        document.execCommand('insertText', false, generatedText);
+        
+        // Trigger input events for Draft.js
+        twitterReplyBox.dispatchEvent(new Event('input', { bubbles: true }));
+        twitterReplyBox.dispatchEvent(new Event('change', { bubbles: true }));
+        twitterReplyBox.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true }));
+        twitterReplyBox.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+      } else if (twitterReplyBox.tagName === 'TEXTAREA') {
         twitterReplyBox.value = generatedText;
         twitterReplyBox.dispatchEvent(new Event('input', { bubbles: true }));
       } else {
+        // Fallback for other contenteditable elements
         twitterReplyBox.textContent = generatedText;
         twitterReplyBox.dispatchEvent(new Event('input', { bubbles: true }));
       }
