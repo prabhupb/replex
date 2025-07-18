@@ -156,9 +156,15 @@ class ReplexContentScript {
                 <option value="friendly">😊 Friendly</option>
                 <option value="professional">💼 Professional</option>
                 <option value="witty">🎭 Witty</option>
+                <option value="playful">🤹 Playful/Humorous</option>
                 <option value="sarcastic">😏 Sarcastic</option>
                 <option value="supportive">🤝 Supportive</option>
                 <option value="casual">😎 Casual</option>
+                <option value="curious">🔍 Curious</option>
+                <option value="critical">🧐 Critical</option>
+                <option value="philosophical">🧠 Philosophical</option>
+                <option value="technical">🧰 Technical</option>
+                <option value="dialectical">⚖️ Dialectical</option>
               </select>
             </div>
             
