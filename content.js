@@ -168,6 +168,11 @@ class ReplexContentScript {
               </select>
             </div>
             
+            <div class="form-group">
+              <label class="form-label" for="context-input">Additional Context (Optional)</label>
+              <textarea id="context-input" class="form-textarea context-input" placeholder="Add specific context for this reply (e.g., 'Focus on the technical aspects' or 'Include my background in AI')"></textarea>
+            </div>
+            
             <button class="btn btn-primary replex-generate" id="generate-reply">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 9.95 5.16-.21 9-4.4 9-9.95V7l-10-5z"/>
@@ -236,10 +241,14 @@ class ReplexContentScript {
   }
 
   loadDefaultTone() {
-    chrome.storage.sync.get(['defaultTone'], (result) => {
+    chrome.storage.sync.get(['defaultTone', 'contextKeywords'], (result) => {
       if (result.defaultTone) {
         const toneSelect = this.replexUI.querySelector('#tone-select');
         toneSelect.value = result.defaultTone;
+      }
+      if (result.contextKeywords) {
+        const contextInput = this.replexUI.querySelector('#context-input');
+        contextInput.placeholder = `Add specific context for this reply (your default: ${result.contextKeywords.substring(0, 50)}${result.contextKeywords.length > 50 ? '...' : ''})`;
       }
     });
   }
@@ -247,6 +256,7 @@ class ReplexContentScript {
   async generateReply() {
     const generateButton = this.replexUI.querySelector('#generate-reply');
     const toneSelect = this.replexUI.querySelector('#tone-select');
+    const contextInput = this.replexUI.querySelector('#context-input');
     const outputDiv = this.replexUI.querySelector('#reply-output');
     const replyTextarea = this.replexUI.querySelector('#generated-reply');
 
@@ -260,7 +270,9 @@ class ReplexContentScript {
       }
 
       const tone = toneSelect.value;
-      const reply = await this.callOpenAI(apiKey, this.currentTweetContext, tone);
+      const additionalContext = contextInput.value.trim();
+      const savedContext = await this.getSavedContext();
+      const reply = await this.callOpenAI(apiKey, this.currentTweetContext, tone, additionalContext, savedContext);
       
       replyTextarea.value = reply;
       outputDiv.style.display = 'block';
@@ -281,11 +293,30 @@ class ReplexContentScript {
     });
   }
 
-  async callOpenAI(apiKey, context, tone) {
+  async getSavedContext() {
+    return new Promise((resolve) => {
+      chrome.storage.sync.get(['contextKeywords'], (result) => {
+        resolve(result.contextKeywords || '');
+      });
+    });
+  }
+
+  async callOpenAI(apiKey, context, tone, additionalContext = '', savedContext = '') {
+    let contextPrompt = '';
+    
+    if (savedContext) {
+      contextPrompt += `\nContext about me: ${savedContext}`;
+    }
+    
+    if (additionalContext) {
+      contextPrompt += `\nAdditional context for this reply: ${additionalContext}`;
+    }
+
     const prompt = `Generate a ${tone} reply to this tweet:
 
 Username: ${context.userName}
 Tweet: "${context.text}"
+${contextPrompt}
 
 Requirements:
 Write a reply to the tweet below that sounds like a real human — thoughtful, casual, sometimes witty or sharp, but always grounded.
@@ -300,7 +331,7 @@ Avoid generic praise — respond meaningfully, disagree if needed, or riff on th
 
 Optional: one emoji if it fits naturally
 
-Don’t include hashtags or links unless they’re organic
+Don't include hashtags or links unless they're organic
 
 Reference or riff on something timely if it makes sense (tech trend, launch, meme, etc).
 
@@ -309,6 +340,8 @@ Keep it brief — think tweet-length or just under.
 Be contextually relevant
 
 Sound natural and engaging
+
+${contextPrompt ? 'Incorporate the provided context naturally into the reply where relevant.' : ''}
 
 Reply:`;
 
@@ -399,7 +432,7 @@ Reply:`;
   }
 
   setupMessageListener() {
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       if (request.action === 'getCurrentTweet') {
         sendResponse(this.currentTweetContext);
       }

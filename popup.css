@@ -166,6 +166,30 @@ body {
   line-height: 1.4;
 }
 
+.form-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--input));
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: hsl(var(--foreground));
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.form-textarea::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

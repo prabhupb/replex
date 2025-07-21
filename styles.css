@@ -331,6 +331,12 @@
   color: hsl(215.4 16.3% 46.9%);
 }
 
+/* Context input specific styling */
+.context-input {
+  min-height: 60px;
+  font-size: 13px;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

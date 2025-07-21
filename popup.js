@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const apiKeyInput = document.getElementById('apiKey');
   const saveKeyButton = document.getElementById('saveKey');
   const defaultToneSelect = document.getElementById('defaultTone');
+  const contextKeywordsTextarea = document.getElementById('contextKeywords');
   const statusDiv = document.getElementById('status');
 
   function showStatus(message, type = 'success') {
@@ -24,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 3000);
   }
 
-  chrome.storage.sync.get(['openaiApiKey', 'defaultTone'], function(result) {
+  chrome.storage.sync.get(['openaiApiKey', 'defaultTone', 'contextKeywords'], function(result) {
     if (result.openaiApiKey) {
       apiKeyInput.value = result.openaiApiKey;
     }
@@ -34,11 +35,15 @@ document.addEventListener('DOMContentLoaded', function() {
       // Set default value if none exists
       defaultToneSelect.value = 'friendly';
     }
+    if (result.contextKeywords) {
+      contextKeywordsTextarea.value = result.contextKeywords;
+    }
   });
 
   saveKeyButton.addEventListener('click', function() {
     const apiKey = apiKeyInput.value.trim();
     const defaultTone = defaultToneSelect.value;
+    const contextKeywords = contextKeywordsTextarea.value.trim();
     
     if (!apiKey) {
       showStatus('Please enter an API key', 'error');
@@ -52,7 +57,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     chrome.storage.sync.set({
       openaiApiKey: apiKey,
-      defaultTone: defaultTone
+      defaultTone: defaultTone,
+      contextKeywords: contextKeywords
     }, function() {
       showStatus('Settings saved successfully!');
     });
@@ -61,6 +67,12 @@ document.addEventListener('DOMContentLoaded', function() {
   defaultToneSelect.addEventListener('change', function() {
     chrome.storage.sync.set({
       defaultTone: defaultToneSelect.value
+    });
+  });
+
+  contextKeywordsTextarea.addEventListener('blur', function() {
+    chrome.storage.sync.set({
+      contextKeywords: contextKeywordsTextarea.value.trim()
     });
   });
 });
