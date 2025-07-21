@@ -4,7 +4,7 @@ A Chrome extension that helps you generate contextually relevant replies to twee
 
 ## Features
 
-- **AI-Powered Replies**: Generate contextual responses using OpenAI's GPT-3.5-turbo
+- **AI-Powered Replies**: Generate contextual responses using OpenAI's GPT-4o-mini
 - **Tone Customization**: Choose from friendly, professional, witty, sarcastic, supportive, or casual tones
 - **Seamless Integration**: Works directly within Twitter/X interface
 - **One-Click Generation**: Quick and easy reply generation
