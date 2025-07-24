@@ -97,13 +97,65 @@ class ReplexContentScript {
 
   extractTweetContext(tweetContainer) {
     const tweetTextElement = tweetContainer.querySelector('[data-testid="tweetText"]');
-    const userNameElement = tweetContainer.querySelector('[data-testid="User-Names"] a span');
-    const handleElement = tweetContainer.querySelector('[data-testid="User-Names"] a[href*="/"]');
+    
+    // Find the User-Name container
+    const userNameContainer = tweetContainer.querySelector('[data-testid="User-Name"]');
+    let userName = '';
+    let handle = '';
+    let displayName = '';
+    
+    if (userNameContainer) {
+      // Get the display name from the first link's text content
+      const nameLink = userNameContainer.querySelector('a');
+      if (nameLink) {
+        // Get the display name from the span inside the link
+        const nameSpan = nameLink.querySelector('span');
+        if (nameSpan) {
+          // Extract the full display name including emojis
+          displayName = nameSpan.innerText.trim();
+          // Extract just the text without emojis for userName
+          userName = nameSpan.textContent.trim();
+        }
+        
+        // Get the handle from the href attribute
+        const href = nameLink.getAttribute('href');
+        if (href) {
+          handle = href.replace('/', '').split('/')[0];
+        }
+      }
+      
+      // If handle not found from main link, look for it in the second link
+      if (!handle) {
+        const links = userNameContainer.querySelectorAll('a');
+        for (const link of links) {
+          const spanWithAt = link.querySelector('span');
+          if (spanWithAt && spanWithAt.textContent.includes('@')) {
+            handle = spanWithAt.textContent.replace('@', '').trim();
+            break;
+          }
+        }
+      }
+    }
+    
+    // Extract profile picture
+    let profilePicUrl = '';
+    const avatarContainer = tweetContainer.querySelector('[data-testid="Tweet-User-Avatar"]');
+    if (avatarContainer) {
+      const profileImg = avatarContainer.querySelector('img[src*="profile_images"]');
+      if (profileImg) {
+        profilePicUrl = profileImg.src;
+      }
+    }
+    
+    // Debug logging
+    console.log('Extracted context:', { displayName, userName, handle, profilePicUrl, text: tweetTextElement ? tweetTextElement.innerText.substring(0, 50) + '...' : '' });
     
     return {
       text: tweetTextElement ? tweetTextElement.innerText : '',
-      userName: userNameElement ? userNameElement.innerText : '',
-      handle: handleElement ? handleElement.getAttribute('href').replace('/', '') : '',
+      userName: userName,
+      displayName: displayName || userName,
+      handle: handle,
+      profilePicUrl: profilePicUrl,
       timestamp: Date.now()
     };
   }
@@ -139,12 +191,13 @@ class ReplexContentScript {
         <div class="replex-body">
           <div class="replex-context">
             <div class="context-header">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 12l2 2 4-4"/>
-                <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
-                <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
-              </svg>
-              <span>Replying to <strong>@${this.currentTweetContext.handle}</strong></span>
+              ${this.currentTweetContext.profilePicUrl ? `
+                <img src="${this.currentTweetContext.profilePicUrl}" alt="Profile" class="reply-profile-pic">
+              ` : ''}
+              <div class="reply-user-info">
+                <div class="reply-display-name">${this.currentTweetContext.displayName || this.currentTweetContext.userName || 'Unknown User'}</div>
+                <div class="reply-handle">@${this.currentTweetContext.handle || 'unknown'}</div>
+              </div>
             </div>
             <div class="tweet-preview">"${this.currentTweetContext.text.substring(0, 120)}${this.currentTweetContext.text.length > 120 ? '...' : ''}"</div>
           </div>
@@ -314,7 +367,8 @@ class ReplexContentScript {
 
     const prompt = `Generate a ${tone} reply to this tweet:
 
-Username: ${context.userName}
+Username: ${context.userName || 'Unknown'}
+Handle: @${context.handle || 'unknown'}
 Tweet: "${context.text}"
 ${contextPrompt}
 

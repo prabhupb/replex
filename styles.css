@@ -115,11 +115,38 @@
 .context-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 12px;
+  margin-bottom: 12px;
   color: hsl(215.4 16.3% 46.9%);
   font-size: 14px;
   font-weight: 500;
+}
+
+.reply-profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.reply-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reply-display-name {
+  color: hsl(222.2 84% 4.9%);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.reply-handle {
+  color: hsl(215.4 16.3% 46.9%);
+  font-size: 13px;
+  font-weight: 400;
 }
 
 .tweet-preview {
@@ -439,6 +466,14 @@
   
   .tweet-preview {
     color: hsl(210 40% 98%);
+  }
+  
+  .reply-display-name {
+    color: hsl(210 40% 98%);
+  }
+  
+  .reply-handle {
+    color: hsl(215 20.2% 65.1%);
   }
   
   .form-label {
