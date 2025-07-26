@@ -226,6 +226,13 @@ class ReplexContentScript {
               <textarea id="context-input" class="form-textarea context-input" placeholder="Add specific context for this reply (e.g., 'Focus on the technical aspects' or 'Include my background in AI')"></textarea>
             </div>
             
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="rephrase-mode" class="form-checkbox">
+                <span>Rephrase context as an engaging tweet (ignores reply tone)</span>
+              </label>
+            </div>
+            
             <button class="btn btn-primary replex-generate" id="generate-reply">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 9.95 5.16-.21 9-4.4 9-9.95V7l-10-5z"/>
@@ -291,6 +298,18 @@ class ReplexContentScript {
     modal.querySelector('#regenerate-reply').addEventListener('click', () => {
       this.generateReply();
     });
+
+    // Add explicit change listener for checkbox to ensure state is properly reflected
+    const checkbox = modal.querySelector('#rephrase-mode');
+    checkbox.addEventListener('change', (e) => {
+      console.log('Checkbox state changed:', e.target.checked);
+      // Force visual update
+      if (e.target.checked) {
+        e.target.setAttribute('checked', 'checked');
+      } else {
+        e.target.removeAttribute('checked');
+      }
+    });
   }
 
   loadDefaultTone() {
@@ -310,6 +329,7 @@ class ReplexContentScript {
     const generateButton = this.replexUI.querySelector('#generate-reply');
     const toneSelect = this.replexUI.querySelector('#tone-select');
     const contextInput = this.replexUI.querySelector('#context-input');
+    const rephraseCheckbox = this.replexUI.querySelector('#rephrase-mode');
     const outputDiv = this.replexUI.querySelector('#reply-output');
     const replyTextarea = this.replexUI.querySelector('#generated-reply');
 
@@ -325,7 +345,9 @@ class ReplexContentScript {
       const tone = toneSelect.value;
       const additionalContext = contextInput.value.trim();
       const savedContext = await this.getSavedContext();
-      const reply = await this.callOpenAI(apiKey, this.currentTweetContext, tone, additionalContext, savedContext);
+      const isRephrase = rephraseCheckbox.checked;
+      
+      const reply = await this.callOpenAI(apiKey, this.currentTweetContext, tone, additionalContext, savedContext, isRephrase);
       
       replyTextarea.value = reply;
       outputDiv.style.display = 'block';
@@ -354,7 +376,7 @@ class ReplexContentScript {
     });
   }
 
-  async callOpenAI(apiKey, context, tone, additionalContext = '', savedContext = '') {
+  async callOpenAI(apiKey, context, tone, additionalContext = '', savedContext = '', isRephrase = false) {
     let contextPrompt = '';
     
     if (savedContext) {
@@ -362,10 +384,21 @@ class ReplexContentScript {
     }
     
     if (additionalContext) {
-      contextPrompt += `\nAdditional context for this reply: ${additionalContext}`;
+      contextPrompt += `\nAdditional context: ${additionalContext}`;
     }
 
-    const prompt = `Generate a ${tone} reply to this tweet:
+    let prompt;
+    
+    if (isRephrase) {
+      // Rephrase mode - turn the context into an engaging tweet
+      prompt = `Rephrase the following into an engaging tweet:
+
+${contextPrompt}
+
+`;
+    } else {
+      // Normal reply mode
+      prompt = `Generate a ${tone} reply to this tweet:
 
 Username: ${context.userName || 'Unknown'}
 Handle: @${context.handle || 'unknown'}
@@ -398,6 +431,7 @@ Sound natural and engaging
 ${contextPrompt ? 'Incorporate the provided context naturally into the reply where relevant.' : ''}
 
 Reply:`;
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
